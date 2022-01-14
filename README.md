@@ -1,6 +1,5 @@
 # riverwm-utils
 Utilities for the River Wayland compositor. Currently just one utility is included.
-description = 
 
 ## Install
 
