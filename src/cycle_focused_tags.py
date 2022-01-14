@@ -98,12 +98,14 @@ def registry_handle_global(registry, id, interface, version):
 
 
 def main():
-    ntags = 32
+    n_tags = 32
     if len(sys.argv) < 2:
         sys.exit(1)
 
+    direction = sys.argv[1]
+
     if len(sys.argv) > 2:
-        ntags = int(sys.argv[2])
+        n_tags = int(sys.argv[2])
 
     
     display = Display()
