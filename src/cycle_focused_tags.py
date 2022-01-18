@@ -73,9 +73,6 @@ class Seat(object):
             if output.wl_output == wl_output:
                 self.focused_output = output
 
-        print("Failed to get focused output")
-        quit()
-
 def registry_handle_global(registry, id, interface, version):
     global status_manager
     global control
