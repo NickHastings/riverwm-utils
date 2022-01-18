@@ -94,16 +94,31 @@ def registry_handle_global(registry, id, interface, version):
             seat.wl_seat = registry.bind(id, WlSeat, version)
 
 
+USAGE='''usage: cycle-focused-tags [DIRECTION] [NTAGS]
+
+Change to either the next or previous focused tags.
+
+The DIRECTION argument shold be either 'next' or 'previous'.  The
+NTAGS argument indicates at which tag number the cycling should loop
+back to the first tag or to the last tag from the first tag.
+
+If NTAGS is ommiteed, 32 is assumed if both arguments are ommitted
+'next' is used as the DIRECTION.
+'''
+
 def main():
     n_tags = 32
-    if len(sys.argv) < 2:
-        sys.exit(1)
+    direction = 'next'
 
-    direction = sys.argv[1]
+    if len(sys.argv) > 1:
+        direction = sys.argv[1]
 
     if len(sys.argv) > 2:
         n_tags = int(sys.argv[2])
 
+    if direction in ('-h', '--help'):
+        print(USAGE)
+        sys.exit(0)
     
     display = Display()
     display.connect()
