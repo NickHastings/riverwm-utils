@@ -23,6 +23,11 @@ python3 -m pip install riverwm-utils
 
 Change to either the next or previous focused tags.
 
+Note that this functionality could easily be [built into
+river](https://github.com/riverwm/river/pull/506), but because of the
+plan to separate the window management to a separate client, such new
+addictions are not being accepted.
+
 The script takes two arguments: the first is being the direction
 next|previous, the second being the maximum number of tags at which
 the cycling should wrap back to the first tag (or to the last tag from
