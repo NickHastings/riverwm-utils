@@ -147,32 +147,23 @@ def main():
     display.dispatch(block=True)
     display.roundtrip()
     tags = seat.focused_output.focused_tags
-
+    new_tags = 0
+    last_tag = 1 << (n_tags-1)
     if direction == 'next':
-        mask = (1<< (n_tags-1) )
-        wrap = ( (tags & mask) != 0 )
-        #If highest bit (last tag) is set => unset it
-        if wrap:
-            tags ^= mask
+        # If last tag is set => unset it and set first bit on new_tags
+        if ( (tags & last_tag) != 0 ):
+            tags ^= last_tag
+            new_tags = 1
 
-        new_tags = (tags << 1)
-
-        # If highest bit was set => set lowest bit to wrap to first tag
-        if wrap:
-            new_tags |= 1
+        new_tags |= (tags << 1)
 
     else:
-        wrap = ((tags & 1) != 0)
-        # If lowest bit is set (first tag) => unset it
-        if wrap:
+        # If lowest bit is set (first tag) => unset it and set last_tag bit on new tags
+        if ( (tags & 1) != 0 ):
             tags ^= 1
+            new_tags = last_tag
 
-        new_tags = (tags >> 1)
-
-        # If lowest bit was set => set highest bit to wrap to last tag
-        if wrap:
-            mask = (1<< (n_tags-1) )
-            new_tags |= mask
+        new_tags |= (tags >> 1)
 
     control.add_argument("set-focused-tags")
     control.add_argument( str(new_tags) )
