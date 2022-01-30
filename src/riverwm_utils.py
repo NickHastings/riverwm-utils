@@ -106,7 +106,7 @@ If NTAGS is ommiteed, 32 is assumed if both arguments are ommitted
 'next' is used as the DIRECTION.
 '''
 
-def main():
+def cycle_focused_tags():
     n_tags = 32
     direction = 'next'
 
@@ -184,6 +184,3 @@ def main():
         control.destroy()
 
     display.disconnect()
-
-if __name__ == '__main__':
-    main()
