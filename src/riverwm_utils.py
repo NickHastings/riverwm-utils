@@ -8,7 +8,7 @@ try:
     from pywayland.protocol.river_status_unstable_v1 import ZriverOutputStatusV1
     from pywayland.protocol.river_status_unstable_v1 import ZriverSeatStatusV1
 except:
-    errtext='''
+    errtxt='''
     Your pywayland package does not have bindings for river-control-unstable-v1
     and/or river-status-unstable-v1.
     These bindings can be generated with the following command:
