@@ -18,7 +18,7 @@ except:
     Adjust the path of /usr/share/river-protocols/ as approriate for your installation.
 '''
 
-    print(errtxt)
+    print(errtext)
     quit()
 
 status_manager = None
