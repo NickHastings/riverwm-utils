@@ -1,3 +1,31 @@
+# cycle-focused-tags
+
+Change to either the next or previous focused tags.
+
+As can be seen in a [pull
+request](https://github.com/riverwm/river/pull/506), this
+functionality can easily be built directly into river. However, [as
+explained by Leon
+Plickat](https://github.com/riverwm/river/pull/506#issuecomment-1008021752)
+there is a plan to separate the window management to a separate
+client, and as such new addictions are not being accepted. The
+approach implemented here was suggested and sample code was
+provided. That sample code forms the basis of this script.
+
+The script takes two arguments: the first is being the direction
+next|previous, the second being the maximum number of tags at which
+the cycling should wrap back to the first tag (or to the last tag from
+the first tag). 
+
+If the second argument is omitted the maximum number of tags is
+assumed to be 32.  If both arguments are ommited the direction,
+next, will be used.
+
+The script can be called using spawn in the users init file. For example:
+```
+riverctl map normal Mod4 Up spawn "cycle-focused-tags previous 9"
+riverctl map normal Mod4 Down spawn "cycle-focused-tags next 9"
+```
 # riverwm-utils
 Utilities for the River Wayland compositor. Currently just one utility is included.
 
@@ -19,26 +47,3 @@ python3 -m pip install riverwm-utils
 
 ## Usage
 
-# cycle-focused-tags
-
-Change to either the next or previous focused tags.
-
-Note that this functionality could easily be [built into
-river](https://github.com/riverwm/river/pull/506), but because of the
-plan to separate the window management to a separate client, such new
-addictions are not being accepted.
-
-The script takes two arguments: the first is being the direction
-next|previous, the second being the maximum number of tags at which
-the cycling should wrap back to the first tag (or to the last tag from
-the first tag).
-
-If the second argument is omitted the maximum number of tags is
-assumed to be 32.  If both arguments are ommited the direction,
-next, will be used.
-
-The script can be called using spawn in the users init file. For example:
-```
-riverctl map normal Mod4 Up spawn "cycle-focused-tags previous 9"
-riverctl map normal Mod4 Down spawn "cycle-focused-tags next 9"
-```
