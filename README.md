@@ -1,4 +1,9 @@
-# cycle-focused-tags
+# riverwm-utils
+Utilities for the River Wayland compositor. Currently just one utility is included.
+
+## Usage
+
+### cycle-focused-tags
 
 Change to either the next or previous focused tags.
 
@@ -26,9 +31,6 @@ The script can be called using spawn in the users init file. For example:
 riverctl map normal Mod4 Up spawn "cycle-focused-tags previous 9"
 riverctl map normal Mod4 Down spawn "cycle-focused-tags next 9"
 ```
-# riverwm-utils
-Utilities for the River Wayland compositor. Currently just one utility is included.
-
 ## Install
 
 ### Development version
@@ -45,5 +47,4 @@ python3 -m pip install ./riverwm-utils
 python3 -m pip install riverwm-utils
 ```
 
-## Usage
 
