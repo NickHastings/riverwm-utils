@@ -13,7 +13,7 @@ functionality can easily be built directly into river. However, [as
 explained by Leon
 Plickat](https://github.com/riverwm/river/pull/506#issuecomment-1008021752)
 there is a plan to separate the window management to a separate
-client, and as such new addictions are not being accepted. The
+client, and as such new additions are not being accepted. The
 approach implemented here was suggested and sample code was
 provided. That sample code forms the basis of this script.
 
