@@ -5,7 +5,7 @@ from pywayland.protocol.wayland import WlSeat
 try:
     from pywayland.protocol.river_control_unstable_v1 import ZriverControlV1
     from pywayland.protocol.river_status_unstable_v1 import ZriverStatusManagerV1
-except:
+except ModuleNotFoundError:
     error_text='''
     Your pywayland package does not have bindings for river-control-unstable-v1
     and/or river-status-unstable-v1.
