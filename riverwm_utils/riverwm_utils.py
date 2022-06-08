@@ -5,8 +5,6 @@ from pywayland.protocol.wayland import WlSeat
 try:
     from pywayland.protocol.river_control_unstable_v1 import ZriverControlV1
     from pywayland.protocol.river_status_unstable_v1 import ZriverStatusManagerV1
-    from pywayland.protocol.river_status_unstable_v1 import ZriverOutputStatusV1
-    from pywayland.protocol.river_status_unstable_v1 import ZriverSeatStatusV1
 except:
     error_text='''
     Your pywayland package does not have bindings for river-control-unstable-v1
