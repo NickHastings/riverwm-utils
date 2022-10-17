@@ -92,7 +92,7 @@ python3 -m pywayland.scanner -i /usr/share/wayland/wayland.xml \
 
 Again note that unless using the Debian packages you'll almost
 certainly need to change `/usr/share/river-protocol` to the path to
-the river soruce tree. Eg `~/.local/src/river/protocol`
+the river source tree. Eg `~/.local/src/river/protocol`
 
 If all is well, you should see output like:
 ```
