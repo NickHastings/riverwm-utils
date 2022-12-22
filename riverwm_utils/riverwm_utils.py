@@ -1,25 +1,61 @@
 import sys
-from pywayland.client import Display
-from pywayland.protocol.wayland import WlOutput
-from pywayland.protocol.wayland import WlSeat
+import os
+
+
+def scan():
+    this_dir = os.path.split(__file__)[0]
+    protocol_dir = os.path.join(this_dir, '..', 'protocolV')
+    input_files = ['wayland.xml',
+                   'river-control-unstable-v1.xml',
+                   'river-status-unstable-v1.xml']
+
+    protocols = [Protocol.parse_file(os.path.join(protocol_dir, input_file))
+                 for input_file in input_files]
+    protocol_imports = {
+        interface.name: protocol.name
+        for protocol in protocols
+        for interface in protocol.interface
+    }
+
+    pywayland_dir = os.path.split(pywayland.__file__)[0]
+    output_dir = os.path.join(pywayland_dir, 'protocol')
+
+    for protocol in protocols:
+        protocol.output(output_dir, protocol_imports)
+
+
 try:
+    from pywayland.protocol.wayland import WlOutput
+    from pywayland.protocol.wayland import WlSeat
     from pywayland.protocol.river_control_unstable_v1 import ZriverControlV1
     from pywayland.protocol.river_status_unstable_v1 import ZriverStatusManagerV1  # noqa: E501
 except ModuleNotFoundError:
-    ERROR_TEXT = ('''
-  Your pywayland package does not have bindings for river-control-unstable-v1
-  and/or river-status-unstable-v1.
-  These bindings can be generated with the following command:
+    try:
+        from pywayland.scanner.protocol import Protocol
+        import pywayland
+        scan()
+        print('Generated river bindings.')
+        print('Please try running cycle-focused-tags again.')
 
-  python3 -m pywayland.scanner -i /usr/share/wayland/wayland.xml '''
-                  '/usr/share/river-protocols/river-control-unstable-v1.xml '
-                  '''/usr/share/river-protocols/river-status-unstable-v1.xml
+    except Exception:
+        this_dir = os.path.split(__file__)[0]
+        protocol_dir = os.path.normpath(os.path.join(this_dir, '..', 'protocol'))
+        ERROR_TEXT = (f'''
+        Your pywayland package does not have bindings for river-control-unstable-v1
+        and/or river-status-unstable-v1.
 
-  Adjust the path of /usr/share/river-protocols/ as approriate for your '''
-                  'installation.')
+        An attempt was made to generate them but it failed. You may be able to
+        generate the manually with the following command:
 
-    print(ERROR_TEXT)
+        python3 -m pywayland.scanner -i {protocol_dir}/wayland.xml '''
+                  f'{protocol_dir}/river-control-unstable-v1.xml '
+                  f'{protocol_dir}/river-status-unstable-v1.xml')
+
+        print(ERROR_TEXT)
+
     sys.exit()
+
+from pywayland.client import Display
 
 STATUS_MANAGER = None
 CONTROL = None
