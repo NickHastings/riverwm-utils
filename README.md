@@ -50,55 +50,15 @@ python3 -m pip install riverwm-utils
 ```
 
 ### Wayland protocols and pywayland
-Before you will be able to run `cycle-focused-tags`, the relevant
-wayland protocol xml files will need to be scanned by
-pywayland. pywayland will automatically be installed by pip as a
-dependency of riverwm-utils, but the wayland protocols may or may not
-already be on your system. The required files are:
-- wayland.xml
-- river-control-unstable-v1.xml
-- river-status-unstable-v1.xml
 
-The first of these should be avaiable from wayland development package
-provided by your systems package manager. Examples of how to install
-(get root permissions in whatever way you would normally):
+For `cycle-focused-tags` to work the relevant wayland protocol xml
+files will need to be scanned by pywayland. If this has not already
+been done `cycle-focused-tags` will attempt to do so.
 
-Debian
-```
-apt install libwayland-dev
-```
-Void
-```
-xbps-install -S wayland-devel
-```
-Arch
-```
-pacman -S wayland
-```
+## Licensing
 
-The river protocol files are not installed by the river
-installer. They do however reside in the river source tree under the
-protocol directory.
+riverwm-utils is released under the GNU General Public License v3.0 only.
 
-If you are using a river package from https://www.ne.jp/asahi/nickh/debian/
-they will be under /usr/share/river-protocols/
-
-Once all three files are on your system the pywayland scanner can be run. Eg
-```
-python3 -m pywayland.scanner -i /usr/share/wayland/wayland.xml \
-         /usr/share/river-protocols/river-control-unstable-v1.xml \
-         /usr/share/river-protocols/river-status-unstable-v1.xml
-```
-
-Again note that unless using the Debian packages you'll almost
-certainly need to change `/usr/share/river-protocol` to the path to
-the river source tree. Eg `~/.local/src/river/protocol`
-
-If all is well, you should see output like:
-```
-INFO:__main__:Parsed 3 input xml files
-INFO:__main__:Generated protocol: wayland
-INFO:__main__:Generated protocol: river_control_unstable_v1
-INFO:__main__:Generated protocol: river_status_unstable_v1
-```
-and then run `cycle-focused-tags` to swich tags.
+The protocols in the `protocol` directory are released under various licenses by
+various parties. You should refer to the copyright block of each protocol for
+the licensing information.
