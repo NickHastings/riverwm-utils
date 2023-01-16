@@ -4,7 +4,7 @@ import os
 
 def scan():
     this_dir = os.path.split(__file__)[0]
-    protocol_dir = os.path.join(this_dir, '..', 'protocolV')
+    protocol_dir = os.path.join(this_dir)
     input_files = ['wayland.xml',
                    'river-control-unstable-v1.xml',
                    'river-status-unstable-v1.xml']
@@ -19,10 +19,8 @@ def scan():
 
     pywayland_dir = os.path.split(pywayland.__file__)[0]
     output_dir = os.path.join(pywayland_dir, 'protocol')
-
     for protocol in protocols:
         protocol.output(output_dir, protocol_imports)
-
 
 try:
     from pywayland.protocol.wayland import WlOutput
