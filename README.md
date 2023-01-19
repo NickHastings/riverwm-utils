@@ -59,6 +59,6 @@ been done `cycle-focused-tags` will attempt to do so.
 
 riverwm-utils is released under the GNU General Public License v3.0 only.
 
-The protocols in the `protocol` directory are released under various licenses by
+The protocols in the `*.xml` files are released under various licenses by
 various parties. You should refer to the copyright block of each protocol for
 the licensing information.
