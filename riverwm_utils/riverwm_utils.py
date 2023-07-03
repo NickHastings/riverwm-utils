@@ -146,9 +146,8 @@ If NTAGS is ommiteed, 32 is assumed if both arguments are ommitted
 'next' is used as the DIRECTION.
 '''
 
-
-def cycle_focused_tags():
-    '''Shift to next or previous tags'''
+def parse_command_line():
+    '''Read commanline arguments'''
     n_tags = 32
     direction = 'next'
 
@@ -156,12 +155,25 @@ def cycle_focused_tags():
         direction = sys.argv[1]
 
     if len(sys.argv) > 2:
-        n_tags = int(sys.argv[2])
+        try:
+            n_tags = int(sys.argv[2])
+        except ValueError:
+            print(USAGE)
+            sys.exit(1)
+
+    if n_tags < 1 or 32 < n_tags:
+        print(USAGE)
+        sys.exit(1)
 
     if direction in ('-h', '--help'):
         print(USAGE)
         sys.exit(0)
 
+    return direction, n_tags
+
+def cycle_focused_tags():
+    '''Shift to next or previous tags'''
+    direction, n_tags = parse_command_line()
     display = Display()
     display.connect()
 
