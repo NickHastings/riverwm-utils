@@ -80,7 +80,7 @@ class Output:
         self.status.user_data = self
         self.status.dispatcher["focused_tags"] = self.handle_focused_tags
 
-    def handle_focused_tags(self, output_status, tags):
+    def handle_focused_tags(self, _, tags):
         '''Handle Event'''
         self.focused_tags = tags
 
