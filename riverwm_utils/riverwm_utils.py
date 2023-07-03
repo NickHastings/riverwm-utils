@@ -2,28 +2,6 @@
 import sys
 import os
 # pylint: disable=global-statement
-
-def scan():
-    '''Scans the wayland protocol xml files'''
-    this_dir = os.path.split(__file__)[0]
-    protocol_dir = os.path.join(this_dir)
-    input_files = ['wayland.xml',
-                   'river-control-unstable-v1.xml',
-                   'river-status-unstable-v1.xml']
-
-    protocols = [Protocol.parse_file(os.path.join(protocol_dir, input_file))
-                 for input_file in input_files]
-    protocol_imports = {
-        interface.name: protocol.name
-        for protocol in protocols
-        for interface in protocol.interface
-    }
-
-    pywayland_dir = os.path.split(pywayland.__file__)[0] # pylint: disable=used-before-assignment
-    output_dir = os.path.join(pywayland_dir, 'protocol')
-    for protocol in protocols:
-        protocol.output(output_dir, protocol_imports)
-
 try:
     from pywayland.protocol.wayland import WlOutput
     from pywayland.protocol.wayland import WlSeat
@@ -33,7 +11,24 @@ except ModuleNotFoundError:
     try:
         from pywayland.scanner.protocol import Protocol
         import pywayland
-        scan()
+        this_dir = os.path.split(__file__)[0]
+        protocol_dir = os.path.join(this_dir)
+        input_files = ['wayland.xml',
+                       'river-control-unstable-v1.xml',
+                       'river-status-unstable-v1.xml']
+
+        protocols = [Protocol.parse_file(os.path.join(protocol_dir, input_file))
+                     for input_file in input_files]
+        protocol_imports = {
+            interface.name: protocol.name
+            for protocol in protocols
+            for interface in protocol.interface
+        }
+
+        pywayland_dir = os.path.split(pywayland.__file__)[0]
+        output_dir = os.path.join(pywayland_dir, 'protocol')
+        for protocol in protocols:
+            protocol.output(output_dir, protocol_imports)
         print('Generated river bindings.')
         print('Please try running cycle-focused-tags again.')
 
@@ -48,14 +43,15 @@ except ModuleNotFoundError:
         generate the manually with the following command:
 
         python3 -m pywayland.scanner -i {PROTOCOL_DIR}/wayland.xml '''
-                  f'{PROTOCOL_DIR}/river-control-unstable-v1.xml '
-                  f'{PROTOCOL_DIR}/river-status-unstable-v1.xml')
+                      f'{PROTOCOL_DIR}/river-control-unstable-v1.xml '
+                      f'{PROTOCOL_DIR}/river-status-unstable-v1.xml')
 
         print(ERROR_TEXT)
 
     sys.exit()
 
-from pywayland.client import Display # pylint: disable=wrong-import-position,import-error
+from pywayland.client import Display  # pylint: disable=import-error
+
 
 STATUS_MANAGER = None
 CONTROL = None
