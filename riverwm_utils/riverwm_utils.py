@@ -140,7 +140,8 @@ Change to either the next or previous focused tags.
 
 The DIRECTION argument shold be either 'next' or 'previous'.  The
 NTAGS argument indicates at which tag number the cycling should loop
-back to the first tag or to the last tag from the first tag.
+back to the first tag or to the last tag from the first tag. NTAGS
+should be and integer between 1 and 32 inclusive.
 
 If NTAGS is ommiteed, 32 is assumed if both arguments are ommitted
 'next' is used as the DIRECTION.
