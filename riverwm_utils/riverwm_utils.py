@@ -1,6 +1,7 @@
 '''Utilities for river wayland compositor'''
 import sys
 import os
+import argparse
 # pylint: disable=global-statement
 try:
     from pywayland.protocol.wayland import WlOutput
@@ -65,6 +66,7 @@ class Output:
     def __init__(self):
         self.wl_output = None
         self.focused_tags = None
+        self.tags = None
         self.status = None
 
     def destroy(self):
@@ -83,7 +85,6 @@ class Output:
     def handle_focused_tags(self, _, tags):
         '''Handle Event'''
         self.focused_tags = tags
-
 
 class Seat:
     '''Represtents a wayland seat'''
@@ -133,48 +134,47 @@ def registry_handle_global(registry, wid, interface, version):
             SEAT = Seat()
             SEAT.wl_seat = registry.bind(wid, WlSeat, version)
 
+def check_direction(direction):
+    '''Check validity of direction argument'''
+    dir_char = direction[0].lower()
+    if dir_char not in ('p', 'n'):
+        raise argparse.ArgumentTypeError(f'Invalid direction: {direction}')
 
-USAGE = '''usage: cycle-focused-tags [DIRECTION] [NTAGS]
+    return dir_char
 
-Change to either the next or previous focused tags.
+def check_n_tags(n_tags):
+    '''Check validity of direction argument'''
+    i_n_tags = int(n_tags)
+    if i_n_tags < 1 or 32 < i_n_tags:
+        raise argparse.ArgumentTypeError(f'Invalid max number of tags: {n_tags}')
 
-The DIRECTION argument shold be either 'next' or 'previous'.  The
-NTAGS argument indicates at which tag number the cycling should loop
-back to the first tag or to the last tag from the first tag. NTAGS
-should be and integer between 1 and 32 inclusive.
+    return i_n_tags
 
-If NTAGS is ommiteed, 32 is assumed if both arguments are ommitted
-'next' is used as the DIRECTION.
-'''
-
-def parse_command_line():
+def parse_command_line() -> argparse.Namespace:
     '''Read commanline arguments'''
-    n_tags = 32
-    direction = 'next'
-
-    if len(sys.argv) > 1:
-        direction = sys.argv[1]
-
-    if len(sys.argv) > 2:
-        try:
-            n_tags = int(sys.argv[2])
-        except ValueError:
-            print(USAGE)
-            sys.exit(1)
-
-    if n_tags < 1 or 32 < n_tags:
-        print(USAGE)
-        sys.exit(1)
-
-    if direction in ('-h', '--help'):
-        print(USAGE)
-        sys.exit(0)
-
-    return direction, n_tags
+    parser = argparse.ArgumentParser(
+        description='Change to either the next or previous tags.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        'direction', default='next', nargs='?', type=check_direction,
+        help=('Direction to cycle through tags. Should be "next" or "previous".')
+    )
+    parser.add_argument(
+        'n_tags', default=32, nargs='?', type=check_n_tags,
+        help=('The tag number the cycling should loop back to the first tag or '
+              'to the last tag from the first tag. Should be and integer '
+              'between 1 and 32 inclusive.')
+    )
+    parser.add_argument(
+        '--skip-unoccupied', '-s', action='store_true', default=False,
+        help='Skip tags with no views.'
+    )
+    return parser.parse_args()
 
 def cycle_focused_tags():
     '''Shift to next or previous tags'''
-    direction, n_tags = parse_command_line()
+    args = parse_command_line()
     display = Display()
     display.connect()
 
@@ -204,8 +204,8 @@ def cycle_focused_tags():
     display.roundtrip()
     tags = SEAT.focused_output.focused_tags
     new_tags = 0
-    last_tag = 1 << (n_tags-1)
-    if direction == 'next':
+    last_tag = 1 << (args.n_tags-1)
+    if args.direction == 'n':
         # If last tag is set => unset it and set first bit on new_tags
         if (tags & last_tag) != 0:
             tags ^= last_tag
