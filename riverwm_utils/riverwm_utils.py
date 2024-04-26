@@ -170,6 +170,10 @@ def parse_command_line() -> argparse.Namespace:
         '--skip-unoccupied', '-s', action='store_true', default=False,
         help='Skip tags with no views.'
     )
+    parser.add_argument(
+        '--tag-mask', '-m', default=0, type=int,
+        help='Ignore these tags (useful for excluding a scratch tag).'
+    )
     return parser.parse_args()
 
 def cycle_focused_tags():
@@ -203,6 +207,13 @@ def cycle_focused_tags():
     display.dispatch(block=True)
     display.roundtrip()
     tags = SEAT.focused_output.focused_tags
+
+    use_mask = args.tag_mask != 0
+    if use_mask:
+        tags_mask_restore = tags & args.tag_mask
+        if tags_mask_restore:
+            tags -= tags_mask_restore
+
     new_tags = 0
     last_tag = 1 << (args.n_tags-1)
     if args.direction == 'n':
@@ -221,6 +232,9 @@ def cycle_focused_tags():
             new_tags = last_tag
 
         new_tags |= (tags >> 1)
+
+    if use_mask:
+        new_tags |= tags_mask_restore
 
     CONTROL.add_argument("set-focused-tags")
     CONTROL.add_argument(str(new_tags))
