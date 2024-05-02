@@ -167,10 +167,6 @@ def parse_command_line() -> argparse.Namespace:
               'between 1 and 32 inclusive.')
     )
     parser.add_argument(
-        '--skip-unoccupied', '-s', action='store_true', default=False,
-        help='Skip tags with no views.'
-    )
-    parser.add_argument(
         '--tag-mask', '-m', default=0, type=int,
         help='Ignore these tags (useful for excluding a scratch tag).'
     )
