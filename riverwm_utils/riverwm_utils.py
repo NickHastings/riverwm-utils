@@ -171,10 +171,6 @@ def parse_command_line() -> argparse.Namespace:
               'between 1 and 32 inclusive.')
     )
     parser.add_argument(
-        '--tag-mask', '-m', default=0, type=int,
-        help='Ignore these tags (useful for excluding a scratch tag).'
-    )
-    parser.add_argument(
         '--debug', '-d', action='store_true',
         help='Enable debugging output.'
     )
@@ -211,13 +207,8 @@ def cycle_focused_tags():
 
     display.dispatch(block=True)
     display.roundtrip()
-    tags = SEAT.focused_output.focused_tags
-
-    use_mask = args.tag_mask != 0
-    if use_mask:
-        tags_mask_restore = tags & args.tag_mask
-        if tags_mask_restore:
-            tags -= tags_mask_restore
+    used_tags = (1 << args.n_tags) - 1
+    tags = SEAT.focused_output.focused_tags & used_tags
 
     new_tags = 0
     last_tag = 1 << (args.n_tags - 1)
@@ -237,9 +228,6 @@ def cycle_focused_tags():
             new_tags = last_tag
 
         new_tags |= (tags >> 1)
-
-    if use_mask:
-        new_tags |= tags_mask_restore
 
     if args.debug:
         print( f'0b{new_tags:010b} {new_tags}' )
