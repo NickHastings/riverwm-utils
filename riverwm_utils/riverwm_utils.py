@@ -86,6 +86,7 @@ class Output:
         '''Handle Event'''
         self.focused_tags = tags
 
+
 class Seat:
     '''Represtents a wayland seat'''
     def __init__(self):
@@ -134,6 +135,7 @@ def registry_handle_global(registry, wid, interface, version):
             SEAT = Seat()
             SEAT.wl_seat = registry.bind(wid, WlSeat, version)
 
+
 def check_direction(direction):
     '''Check validity of direction argument'''
     dir_char = direction[0].lower()
@@ -142,6 +144,7 @@ def check_direction(direction):
 
     return dir_char
 
+
 def check_n_tags(n_tags):
     '''Check validity of direction argument'''
     i_n_tags = int(n_tags)
@@ -149,6 +152,7 @@ def check_n_tags(n_tags):
         raise argparse.ArgumentTypeError(f'Invalid max number of tags: {n_tags}')
 
     return i_n_tags
+
 
 def parse_command_line() -> argparse.Namespace:
     '''Read commanline arguments'''
@@ -171,6 +175,7 @@ def parse_command_line() -> argparse.Namespace:
         help='Ignore these tags (useful for excluding a scratch tag).'
     )
     return parser.parse_args()
+
 
 def cycle_focused_tags():
     '''Shift to next or previous tags'''
@@ -211,7 +216,7 @@ def cycle_focused_tags():
             tags -= tags_mask_restore
 
     new_tags = 0
-    last_tag = 1 << (args.n_tags-1)
+    last_tag = 1 << (args.n_tags - 1)
     if args.direction == 'n':
         # If last tag is set => unset it and set first bit on new_tags
         if (tags & last_tag) != 0:
