@@ -166,10 +166,6 @@ def parse_command_line() -> argparse.Namespace:
               'to the last tag from the first tag. Should be and integer '
               'between 1 and 32 inclusive.')
     )
-    parser.add_argument(
-        '--skip-unoccupied', '-s', action='store_true', default=False,
-        help='Skip tags with no views.'
-    )
     return parser.parse_args()
 
 def cycle_focused_tags():
