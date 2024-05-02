@@ -173,6 +173,10 @@ def parse_command_line() -> argparse.Namespace:
               'between 1 and 32 inclusive.')
     )
     parser.add_argument(
+        '--all-outputs', '-a', dest='all_outputs', action='store_true',
+        help='Cycle the tags for all outputs (following the active output).'
+    )
+    parser.add_argument(
         '--follow', '-f', dest='follow', action='store_true',
         help='Move the active window when cycling.'
     )
@@ -246,6 +250,23 @@ def cycle_focused_tags():
     CONTROL.add_argument("set-focused-tags")
     CONTROL.add_argument(str(new_tags))
     CONTROL.run_command(SEAT.wl_seat)
+
+    if args.all_outputs and len(OUTPUTS) > 1:
+        # The active output has been switched, walk over all other outputs and set
+        # their tags took, wrapping back to the start (where setting can be skipped).
+        for i in range(len(OUTPUTS)):
+            CONTROL.add_argument("focus-output")
+            CONTROL.add_argument("next")
+            CONTROL.run_command(SEAT.wl_seat)
+
+            if i + 1 == len(OUTPUTS):
+                # Back to the start which has already had it's tags set.
+                # Breaking here isn't needed but the next assignment is redundant.
+                break
+
+            CONTROL.add_argument("set-focused-tags")
+            CONTROL.add_argument(str(new_tags))
+            CONTROL.run_command(SEAT.wl_seat)
 
     display.dispatch(block=True)
     display.roundtrip()
