@@ -174,6 +174,10 @@ def parse_command_line() -> argparse.Namespace:
         '--tag-mask', '-m', default=0, type=int,
         help='Ignore these tags (useful for excluding a scratch tag).'
     )
+    parser.add_argument(
+        '--debug', '-d', action='store_true',
+        help='Enable debugging output.'
+    )
     return parser.parse_args()
 
 
@@ -236,6 +240,9 @@ def cycle_focused_tags():
 
     if use_mask:
         new_tags |= tags_mask_restore
+
+    if args.debug:
+        print( f'0b{new_tags:010b} {new_tags}' )
 
     CONTROL.add_argument("set-focused-tags")
     CONTROL.add_argument(str(new_tags))
