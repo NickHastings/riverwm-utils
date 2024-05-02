@@ -18,8 +18,8 @@ except ModuleNotFoundError:
                        'river-control-unstable-v1.xml',
                        'river-status-unstable-v1.xml']
 
-        protocols = [Protocol.parse_file(os.path.join(protocol_dir, input_file))
-                     for input_file in input_files]
+        protocols = [Protocol.parse_file(os.path.join(
+            protocol_dir, input_file)) for input_file in input_files]
         protocol_imports = {
             interface.name: protocol.name
             for protocol in protocols
@@ -35,10 +35,11 @@ except ModuleNotFoundError:
 
     except ImportError:
         THIS_DIR = os.path.split(__file__)[0]
-        PROTOCOL_DIR = os.path.normpath(os.path.join(THIS_DIR, '..', 'protocol'))
+        PROTOCOL_DIR = os.path.normpath(
+            os.path.join(THIS_DIR, '..', 'protocol'))
         ERROR_TEXT = (f'''
-        Your pywayland package does not have bindings for river-control-unstable-v1
-        and/or river-status-unstable-v1.
+        Your pywayland package does not have bindings for
+        river-control-unstable-v1 and/or river-status-unstable-v1.
 
         An attempt was made to generate them but it failed. You may be able to
         generate the manually with the following command:
@@ -149,7 +150,8 @@ def check_n_tags(n_tags):
     '''Check validity of direction argument'''
     i_n_tags = int(n_tags)
     if i_n_tags < 1 or 32 < i_n_tags:
-        raise argparse.ArgumentTypeError(f'Invalid max number of tags: {n_tags}')
+        raise argparse.ArgumentTypeError(
+            f'Invalid max number of tags: {n_tags}')
 
     return i_n_tags
 
@@ -162,12 +164,12 @@ def parse_command_line() -> argparse.Namespace:
     )
     parser.add_argument(
         'direction', default='next', nargs='?', type=check_direction,
-        help=('Direction to cycle through tags. Should be "next" or "previous".')
+        help=('Direction to cycle through tags. Either "next" or "previous".')
     )
     parser.add_argument(
         'n_tags', default=32, nargs='?', type=check_n_tags,
-        help=('The tag number the cycling should loop back to the first tag or '
-              'to the last tag from the first tag. Should be and integer '
+        help=('The tag number the cycling should loop back to the first tag '
+              'or to the last tag from the first tag. Should be and integer '
               'between 1 and 32 inclusive.')
     )
     parser.add_argument(
@@ -230,7 +232,7 @@ def cycle_focused_tags():
         new_tags |= (tags >> 1)
 
     if args.debug:
-        print( f'0b{new_tags:010b} {new_tags}' )
+        print(f'0b{new_tags:010b} {new_tags}')
 
     CONTROL.add_argument("set-focused-tags")
     CONTROL.add_argument(str(new_tags))
