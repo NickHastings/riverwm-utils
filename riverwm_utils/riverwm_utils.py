@@ -173,6 +173,10 @@ def parse_command_line() -> argparse.Namespace:
               'between 1 and 32 inclusive.')
     )
     parser.add_argument(
+        '--follow', '-f', dest='follow', action='store_true',
+        help='Move the active window when cycling.'
+    )
+    parser.add_argument(
         '--debug', '-d', action='store_true',
         help='Enable debugging output.'
     )
@@ -233,6 +237,11 @@ def cycle_focused_tags():
 
     if args.debug:
         print(f'0b{new_tags:010b} {new_tags}')
+
+    if args.follow:
+        CONTROL.add_argument("set-view-tags")
+        CONTROL.add_argument(str(new_tags))
+        CONTROL.run_command(SEAT.wl_seat)
 
     CONTROL.add_argument("set-focused-tags")
     CONTROL.add_argument(str(new_tags))
