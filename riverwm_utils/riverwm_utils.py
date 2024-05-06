@@ -236,7 +236,7 @@ def cycle_focused_tags():
         new_tags |= (tags >> 1)
 
     if args.debug:
-        print(f'0b{new_tags:010b} {new_tags}')
+        print(f'0b{new_tags:032b} {new_tags:10d}')
 
     if args.follow:
         CONTROL.add_argument("set-view-tags")
