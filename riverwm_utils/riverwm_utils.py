@@ -137,6 +137,51 @@ def registry_handle_global(registry, wid, interface, version):
             SEAT.wl_seat = registry.bind(wid, WlSeat, version)
 
 
+def prepare_display(display: Display):
+    '''Prepare display global objects'''
+    display.connect()
+
+    registry = display.get_registry()
+    registry.dispatcher["global"] = registry_handle_global
+
+    display.dispatch(block=True)
+    display.roundtrip()
+
+    if STATUS_MANAGER is None:
+        print("Failed to bind river status manager")
+        sys.exit()
+
+    if CONTROL is None:
+        print("Failed to bind river control")
+        sys.exit()
+
+    # Configuring all outputs, even the ones we do not care about,
+    # should be faster than first waiting for river to advertise the
+    # focused output of the SEAT.
+    for output in OUTPUTS:
+        output.configure()
+
+    SEAT.configure()
+
+    display.dispatch(block=True)
+    display.roundtrip()
+
+
+def close_display(display):
+    '''Clean up objects'''
+    SEAT.destroy()
+    for output in OUTPUTS:
+        output.destroy()
+
+    if STATUS_MANAGER is not None:
+        STATUS_MANAGER.destroy()
+
+    if CONTROL is not None:
+        CONTROL.destroy()
+
+    display.disconnect()
+
+
 def check_direction(direction):
     '''Check validity of direction argument'''
     dir_char = direction[0].lower()
@@ -191,32 +236,8 @@ def cycle_focused_tags():
     '''Shift to next or previous tags'''
     args = parse_command_line()
     display = Display()
-    display.connect()
+    prepare_display(display)
 
-    registry = display.get_registry()
-    registry.dispatcher["global"] = registry_handle_global
-
-    display.dispatch(block=True)
-    display.roundtrip()
-
-    if STATUS_MANAGER is None:
-        print("Failed to bind river status manager")
-        sys.exit()
-
-    if CONTROL is None:
-        print("Failed to bind river control")
-        sys.exit()
-
-    # Configuring all outputs, even the ones we do not care about,
-    # should be faster than first waiting for river to advertise the
-    # focused output of the SEAT.
-    for output in OUTPUTS:
-        output.configure()
-
-    SEAT.configure()
-
-    display.dispatch(block=True)
-    display.roundtrip()
     used_tags = (1 << args.n_tags) - 1
     tags = SEAT.focused_output.focused_tags & used_tags
 
@@ -273,14 +294,4 @@ def cycle_focused_tags():
     display.dispatch(block=True)
     display.roundtrip()
 
-    SEAT.destroy()
-    for output in OUTPUTS:
-        output.destroy()
-
-    if STATUS_MANAGER is not None:
-        STATUS_MANAGER.destroy()
-
-    if CONTROL is not None:
-        CONTROL.destroy()
-
-    display.disconnect()
+    close_display(display)
