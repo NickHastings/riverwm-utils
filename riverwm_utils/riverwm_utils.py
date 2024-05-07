@@ -2,6 +2,7 @@
 import sys
 import os
 import argparse
+import struct
 # pylint: disable=global-statement
 try:
     from pywayland.protocol.wayland import WlOutput
@@ -67,6 +68,7 @@ class Output:
     def __init__(self):
         self.wl_output = None
         self.focused_tags = None
+        self.view_tags = None
         self.tags = None
         self.status = None
 
@@ -82,10 +84,15 @@ class Output:
         self.status = STATUS_MANAGER.get_river_output_status(self.wl_output)
         self.status.user_data = self
         self.status.dispatcher["focused_tags"] = self.handle_focused_tags
+        self.status.dispatcher["view_tags"] = self.handle_view_tags
 
     def handle_focused_tags(self, _, tags):
         '''Handle Event'''
         self.focused_tags = tags
+
+    def handle_view_tags(self, _, tags):
+        '''Handle Event'''
+        self.view_tags = tags
 
 
 class Seat:
@@ -226,10 +233,65 @@ def parse_command_line() -> argparse.Namespace:
         help='Move the active window when cycling.'
     )
     parser.add_argument(
+        '--skip-empty', '-s', action='store_true',
+        help='Skip empty tags.'
+    )
+    parser.add_argument(
         '--debug', '-d', action='store_true',
         help='Enable debugging output.'
     )
     return parser.parse_args()
+
+
+def get_occupied_tags(view_tags):
+    '''Return bitmap of occupied tags as int'''
+    occupied_tags = 0
+    nviews = int(len(view_tags) / 4)
+    for view in struct.unpack(f'{nviews}I', view_tags):
+        occupied_tags |= view
+
+    return occupied_tags
+
+
+def is_occupied(tags, occupied_tags):
+    '''Return true if tags are occupied'''
+    return bool(tags & occupied_tags)
+
+
+def get_new_tags(cli_args, tags, last_tag, occupied_tags):
+    '''Return the new tag set'''
+
+    # All tags are empty and we want to skip empty tags
+    # => return the current tags
+    if cli_args.skip_empty and occupied_tags == 0:
+        return tags
+
+    while True:
+        new_tags = 0
+        if cli_args.direction == 'n':
+            # If last tag is set => unset it and set first bit on new_tags
+            if (tags & last_tag) != 0:
+                tags ^= last_tag
+                new_tags = 1
+
+            new_tags |= (tags << 1)
+
+        else:
+            # If lowest bit is set (first tag) => unset it and set
+            # last_tag bit on new tags
+            if (tags & 1) != 0:
+                tags ^= 1
+                new_tags = last_tag
+
+            new_tags |= (tags >> 1)
+
+        if cli_args.debug:
+            print(f'new 0b{new_tags:032b}')
+
+        if not cli_args.skip_empty or is_occupied(new_tags, occupied_tags):
+            return new_tags
+
+        tags = new_tags
 
 
 def cycle_focused_tags():
@@ -240,28 +302,13 @@ def cycle_focused_tags():
 
     used_tags = (1 << args.n_tags) - 1
     tags = SEAT.focused_output.focused_tags & used_tags
-
-    new_tags = 0
-    last_tag = 1 << (args.n_tags - 1)
-    if args.direction == 'n':
-        # If last tag is set => unset it and set first bit on new_tags
-        if (tags & last_tag) != 0:
-            tags ^= last_tag
-            new_tags = 1
-
-        new_tags |= (tags << 1)
-
-    else:
-        # If lowest bit is set (first tag) => unset it and set
-        # last_tag bit on new tags
-        if (tags & 1) != 0:
-            tags ^= 1
-            new_tags = last_tag
-
-        new_tags |= (tags >> 1)
-
+    view_tags = SEAT.focused_output.view_tags
+    occupied_tags = get_occupied_tags(view_tags) & used_tags
     if args.debug:
-        print(f'0b{new_tags:032b} {new_tags:10d}')
+        print(f'occ 0b{occupied_tags:032b}')
+
+    last_tag = 1 << (args.n_tags - 1)
+    new_tags = get_new_tags(args, tags, last_tag, occupied_tags)
 
     if args.follow:
         CONTROL.add_argument("set-view-tags")
