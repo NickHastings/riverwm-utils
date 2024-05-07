@@ -252,8 +252,9 @@ def cycle_focused_tags():
     CONTROL.run_command(SEAT.wl_seat)
 
     if args.all_outputs and len(OUTPUTS) > 1:
-        # The active output has been switched, walk over all other outputs and set
-        # their tags took, wrapping back to the start (where setting can be skipped).
+        # The active output has been switched, walk over all other outputs and
+        # set their tags too, wrapping back to the start (where setting can be
+        # skipped).
         for i in range(len(OUTPUTS)):
             CONTROL.add_argument("focus-output")
             CONTROL.add_argument("next")
@@ -261,7 +262,8 @@ def cycle_focused_tags():
 
             if i + 1 == len(OUTPUTS):
                 # Back to the start which has already had it's tags set.
-                # Breaking here isn't needed but the next assignment is redundant.
+                # Breaking here isn't needed but the next assignment is
+                # redundant.
                 break
 
             CONTROL.add_argument("set-focused-tags")
