@@ -233,6 +233,10 @@ def parse_command_line() -> argparse.Namespace:
         help='Move the active window when cycling.'
     )
     parser.add_argument(
+        '--skip-occupied', '-o', action='store_true',
+        help='Skip occupied tags.'
+    )
+    parser.add_argument(
         '--skip-empty', '-s', action='store_true',
         help='Skip empty tags.'
     )
@@ -253,12 +257,7 @@ def get_occupied_tags(view_tags: int) -> int:
     return occupied_tags
 
 
-def is_occupied(tags: int, occupied_tags: int) -> bool:
-    '''Return true if tags are occupied'''
-    return bool(tags & occupied_tags)
-
-
-def get_new_tags(cli_args: argparse.Namespace, tags: int, last_tag: int,
+def get_new_tags(cli_args: argparse.Namespace, tags: int,
                  occupied_tags: int) -> int:
     '''Return the new tag set'''
 
@@ -267,7 +266,21 @@ def get_new_tags(cli_args: argparse.Namespace, tags: int, last_tag: int,
     if cli_args.skip_empty and occupied_tags == 0:
         return tags
 
+    # All tags are occupied and we want to skip occupied tags
+    # => return the current tags
+    used_tags = (1 << cli_args.n_tags) - 1
+    if cli_args.skip_occupied and used_tags == (used_tags ^ occupied_tags):
+        return tags
+
+    i = 0
+    initial_tags = tags
+    last_tag = 1 << (cli_args.n_tags - 1)
     while True:
+        if i >= cli_args.n_tags:
+            # Looped over all tags. Something is wrong, bail out
+            print('Warning looped over all tags')
+            return initial_tags
+
         new_tags = 0
         if cli_args.direction == 'n':
             # If last tag is set => unset it and set first bit on new_tags
@@ -286,13 +299,18 @@ def get_new_tags(cli_args: argparse.Namespace, tags: int, last_tag: int,
 
             new_tags |= (tags >> 1)
 
-        if cli_args.debug:
-            print(f'new 0b{new_tags:032b}')
-
-        if not cli_args.skip_empty or is_occupied(new_tags, occupied_tags):
-            return new_tags
-
         tags = new_tags
+        i += 1
+        if cli_args.debug:
+            print(f'new 0b{tags:032b}')
+
+        if cli_args.skip_empty and not bool(tags & occupied_tags):
+            continue
+
+        if cli_args.skip_occupied and bool(tags & occupied_tags):
+            continue
+
+        return tags
 
 
 def cycle_focused_tags():
@@ -308,8 +326,7 @@ def cycle_focused_tags():
     if args.debug:
         print(f'occ 0b{occupied_tags:032b}')
 
-    last_tag = 1 << (args.n_tags - 1)
-    new_tags = get_new_tags(args, tags, last_tag, occupied_tags)
+    new_tags = get_new_tags(args, tags, occupied_tags)
 
     if args.follow:
         CONTROL.add_argument("set-view-tags")
