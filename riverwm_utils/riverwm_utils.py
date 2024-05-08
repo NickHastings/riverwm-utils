@@ -174,7 +174,7 @@ def prepare_display(display: Display):
     display.roundtrip()
 
 
-def close_display(display):
+def close_display(display: Display):
     '''Clean up objects'''
     SEAT.destroy()
     for output in OUTPUTS:
@@ -189,7 +189,7 @@ def close_display(display):
     display.disconnect()
 
 
-def check_direction(direction):
+def check_direction(direction: str) -> str:
     '''Check validity of direction argument'''
     dir_char = direction[0].lower()
     if dir_char not in ('p', 'n'):
@@ -198,7 +198,7 @@ def check_direction(direction):
     return dir_char
 
 
-def check_n_tags(n_tags):
+def check_n_tags(n_tags: int) -> int:
     '''Check validity of direction argument'''
     i_n_tags = int(n_tags)
     if i_n_tags < 1 or 32 < i_n_tags:
@@ -243,7 +243,7 @@ def parse_command_line() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_occupied_tags(view_tags):
+def get_occupied_tags(view_tags: int) -> int:
     '''Return bitmap of occupied tags as int'''
     occupied_tags = 0
     nviews = int(len(view_tags) / 4)
@@ -253,12 +253,13 @@ def get_occupied_tags(view_tags):
     return occupied_tags
 
 
-def is_occupied(tags, occupied_tags):
+def is_occupied(tags: int, occupied_tags: int) -> bool:
     '''Return true if tags are occupied'''
     return bool(tags & occupied_tags)
 
 
-def get_new_tags(cli_args, tags, last_tag, occupied_tags):
+def get_new_tags(cli_args: argparse.Namespace, tags: int, last_tag: int,
+                 occupied_tags: int) -> int:
     '''Return the new tag set'''
 
     # All tags are empty and we want to skip empty tags
