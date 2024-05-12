@@ -287,8 +287,8 @@ def get_new_tags(cli_args: argparse.Namespace, tags: int,
             if (tags & last_tag) != 0:
                 tags ^= last_tag
                 new_tags = 1
-            else:
-                new_tags |= (tags << 1)
+
+            new_tags |= (tags << 1)
 
         else:
             # If lowest bit is set (first tag) => unset it and set
@@ -296,8 +296,8 @@ def get_new_tags(cli_args: argparse.Namespace, tags: int,
             if (tags & 1) != 0:
                 tags ^= 1
                 new_tags = last_tag
-            else:
-                new_tags |= (tags >> 1)
+
+            new_tags |= (tags >> 1)
 
         tags = new_tags
         i += 1
