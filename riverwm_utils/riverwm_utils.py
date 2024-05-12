@@ -320,9 +320,15 @@ def cycle_focused_tags():
     prepare_display(display)
 
     used_tags = (1 << args.n_tags) - 1
+
     tags = SEAT.focused_output.focused_tags & used_tags
-    view_tags = SEAT.focused_output.view_tags
-    occupied_tags = get_occupied_tags(view_tags) & used_tags
+    if args.all_outputs and len(OUTPUTS) > 1:
+        occupied_tags = 0
+        for output in OUTPUTS:
+            occupied_tags |= get_occupied_tags(output.view_tags) & used_tags
+    else:
+        occupied_tags = get_occupied_tags(SEAT.focused_output.view_tags) & used_tags
+
     if args.debug:
         print(f'occ 0b{occupied_tags:032b}')
 
