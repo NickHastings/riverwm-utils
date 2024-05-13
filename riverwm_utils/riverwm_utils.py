@@ -247,8 +247,23 @@ def parse_command_line() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_occupied_tags(view_tags: int) -> int:
+def get_occupied_tags(cli_args: argparse.Namespace) -> int:
     '''Return bitmap of occupied tags as int'''
+    used_tags = (1 << cli_args.n_tags) - 1
+
+    if not cli_args.all_outputs or len(OUTPUTS) == 1:
+        return get_occupied_from_view_tags(
+            SEAT.focused_output.view_tags) & used_tags
+
+    occupied_tags = 0
+    for output in OUTPUTS:
+        occupied_tags |= get_occupied_from_view_tags(output.view_tags)
+
+    return occupied_tags & used_tags
+
+
+def get_occupied_from_view_tags(view_tags: int):
+    '''Return bitmap of view_tags occupied tags as int'''
     occupied_tags = 0
     nviews = int(len(view_tags) / 4)
     for view in struct.unpack(f'{nviews}I', view_tags):
@@ -257,9 +272,11 @@ def get_occupied_tags(view_tags: int) -> int:
     return occupied_tags
 
 
-def get_new_tags(cli_args: argparse.Namespace, tags: int,
+def get_new_tags(cli_args: argparse.Namespace,
                  occupied_tags: int) -> int:
     '''Return the new tag set'''
+    used_tags = (1 << cli_args.n_tags) - 1
+    tags = SEAT.focused_output.focused_tags & used_tags
 
     # All tags are empty and we want to skip empty tags
     # => return the current tags
@@ -268,7 +285,6 @@ def get_new_tags(cli_args: argparse.Namespace, tags: int,
 
     # All tags are occupied and we want to skip occupied tags
     # => return the current tags
-    used_tags = (1 << cli_args.n_tags) - 1
     if cli_args.skip_occupied and used_tags == (used_tags ^ occupied_tags):
         return tags
 
@@ -301,8 +317,6 @@ def get_new_tags(cli_args: argparse.Namespace, tags: int,
 
         tags = new_tags
         i += 1
-        if cli_args.debug:
-            print(f'new 0b{tags:032b}')
 
         if cli_args.skip_empty and not bool(tags & occupied_tags):
             continue
@@ -313,28 +327,9 @@ def get_new_tags(cli_args: argparse.Namespace, tags: int,
         return tags
 
 
-def cycle_focused_tags():
-    '''Shift to next or previous tags'''
-    args = parse_command_line()
-    display = Display()
-    prepare_display(display)
-
-    used_tags = (1 << args.n_tags) - 1
-
-    tags = SEAT.focused_output.focused_tags & used_tags
-    if args.all_outputs and len(OUTPUTS) > 1:
-        occupied_tags = 0
-        for output in OUTPUTS:
-            occupied_tags |= get_occupied_tags(output.view_tags) & used_tags
-    else:
-        occupied_tags = get_occupied_tags(SEAT.focused_output.view_tags) & used_tags
-
-    if args.debug:
-        print(f'occ 0b{occupied_tags:032b}')
-
-    new_tags = get_new_tags(args, tags, occupied_tags)
-
-    if args.follow:
+def set_new_tags(cli_args: argparse.Namespace, new_tags: int):
+    '''Set the focussed tags'''
+    if cli_args.follow:
         CONTROL.add_argument("set-view-tags")
         CONTROL.add_argument(str(new_tags))
         CONTROL.run_command(SEAT.wl_seat)
@@ -343,24 +338,45 @@ def cycle_focused_tags():
     CONTROL.add_argument(str(new_tags))
     CONTROL.run_command(SEAT.wl_seat)
 
-    if args.all_outputs and len(OUTPUTS) > 1:
-        # The active output has been switched, walk over all other outputs and
-        # set their tags too, wrapping back to the start (where setting can be
-        # skipped).
-        for i in range(len(OUTPUTS)):
-            CONTROL.add_argument("focus-output")
-            CONTROL.add_argument("next")
-            CONTROL.run_command(SEAT.wl_seat)
+    if len(OUTPUTS) == 1 or not cli_args.all_outputs:
+        return
 
-            if i + 1 == len(OUTPUTS):
-                # Back to the start which has already had it's tags set.
-                # Breaking here isn't needed but the next assignment is
-                # redundant.
-                break
+    # The active output has been switched, walk over all other outputs and
+    # set their tags too, wrapping back to the start (where setting can be
+    # skipped).
+    for i in range(len(OUTPUTS)):
+        CONTROL.add_argument("focus-output")
+        CONTROL.add_argument("next")
+        CONTROL.run_command(SEAT.wl_seat)
 
-            CONTROL.add_argument("set-focused-tags")
-            CONTROL.add_argument(str(new_tags))
-            CONTROL.run_command(SEAT.wl_seat)
+        if i + 1 == len(OUTPUTS):
+            # Back to the start which has already had it's tags set.
+            # Breaking here isn't needed but the next assignment is
+            # redundant.
+            break
+
+        CONTROL.add_argument("set-focused-tags")
+        CONTROL.add_argument(str(new_tags))
+        CONTROL.run_command(SEAT.wl_seat)
+
+    return
+
+
+def cycle_focused_tags():
+    '''Shift to next or previous tags'''
+    args = parse_command_line()
+    display = Display()
+    prepare_display(display)
+
+    occupied_tags = get_occupied_tags(args)
+    new_tags = get_new_tags(args, occupied_tags)
+
+    if args.debug:
+        print(f'cur 0b{SEAT.focused_output.focused_tags:032b}')
+        print(f'occ 0b{occupied_tags:032b}')
+        print(f'new 0b{new_tags:032b}')
+
+    set_new_tags(args, new_tags)
 
     display.dispatch(block=True)
     display.roundtrip()
