@@ -20,16 +20,16 @@ provided. That sample code forms the basis of this script.
 The script takes two arguments: the first is being the direction
 next|previous, the second being the maximum number of tags at which
 the cycling should wrap back to the first tag (or to the last tag from
-the first tag). 
+the first tag).
 
 If the second argument is omitted the maximum number of tags is
-assumed to be 32.  If both arguments are ommited the direction,
+assumed to be 32.  If both arguments are omitted the direction,
 next, will be used.
 
 The script can be called using spawn in the users init file. For example:
 ```
-riverctl map normal Mod4 Up spawn "cycle-focused-tags previous 9"
-riverctl map normal Mod4 Down spawn "cycle-focused-tags next 9"
+riverctl map normal Mod4 Up spawn "cycle-focused-tags +1 9"
+riverctl map normal Mod4 Down spawn "cycle-focused-tags -1 9"
 ```
 
 
