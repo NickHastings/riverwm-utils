@@ -191,15 +191,6 @@ def close_display(display: Display) -> None:
     display.disconnect()
 
 
-def check_direction(direction: str) -> str:
-    '''Check validity of direction argument'''
-    dir_char = direction[0].lower()
-    if dir_char not in ('p', 'n'):
-        raise argparse.ArgumentTypeError(f'Invalid direction: {direction}')
-
-    return dir_char
-
-
 def check_n_tags(n_tags: int) -> int:
     '''Check max tag number argument'''
     i_n_tags = int(n_tags)
@@ -217,8 +208,8 @@ def parse_command_line() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        'direction', default='next', nargs='?', type=check_direction,
-        help=('Direction to cycle through tags. Either "next" or "previous".')
+        'n_cycle', default=1, nargs='?', type=int,
+        help=('Number of tags to cycle through. Signed integer.')
     )
     parser.add_argument(
         'n_tags', default=32, nargs='?', type=check_n_tags,
@@ -280,14 +271,12 @@ def get_new_tags(cli_args: argparse.Namespace,
     used_tags = (1 << cli_args.n_tags) - 1
     tags = SEAT.focused_output.focused_tags & used_tags
 
-    # All tags are empty and we want to skip empty tags
-    # => return the current tags
-    if cli_args.skip_empty and occupied_tags == 0:
-        return tags
-
-    # All tags are occupied and we want to skip occupied tags
-    # => return the current tags
-    if cli_args.skip_occupied and used_tags == (used_tags ^ occupied_tags):
+    if (cli_args.n_cycle == 0  # noqa: W504
+        or cli_args.skip_empty and occupied_tags == 0
+        # All tags empty & we want to skip empty tags
+        or cli_args.skip_occupied and used_tags == (used_tags ^ occupied_tags)
+        # All tags occupied & we want to skip occupied tags
+            ):
         return tags
 
     i = 0
@@ -300,7 +289,7 @@ def get_new_tags(cli_args: argparse.Namespace,
             return initial_tags
 
         new_tags = 0
-        if cli_args.direction == 'n':
+        if cli_args.n_cycle > 0:
             # If last tag is set => unset it and set first bit on new_tags
             if (tags & last_tag) != 0:
                 tags ^= last_tag
@@ -318,7 +307,6 @@ def get_new_tags(cli_args: argparse.Namespace,
             new_tags |= (tags >> 1)
 
         tags = new_tags
-        i += 1
 
         if cli_args.skip_empty and not bool(tags & occupied_tags):
             continue
@@ -326,7 +314,10 @@ def get_new_tags(cli_args: argparse.Namespace,
         if cli_args.skip_occupied and bool(tags & occupied_tags):
             continue
 
-        return tags
+        i += 1
+
+        if i == abs(cli_args.n_cycle) % cli_args.n_tags:
+            return tags
 
 
 def set_new_tags(cli_args: argparse.Namespace, new_tags: int) -> None:
