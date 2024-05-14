@@ -97,7 +97,7 @@ class Output:
 
 
 class Seat:
-    '''Represtents a wayland seat'''
+    '''Represents a wayland seat'''
     def __init__(self):
         self.wl_seat = None
         self.status = None
@@ -206,7 +206,7 @@ def check_n_tags(n_tags: int) -> int:
 
 
 def parse_command_line() -> argparse.Namespace:
-    '''Read commanline arguments'''
+    '''Read commandline arguments'''
     parser = argparse.ArgumentParser(
         description='Change to either the next or previous tags.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
