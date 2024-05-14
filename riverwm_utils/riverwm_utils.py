@@ -189,15 +189,6 @@ def close_display(display: Display):
     display.disconnect()
 
 
-def check_direction(direction: str) -> str:
-    '''Check validity of direction argument'''
-    dir_char = direction[0].lower()
-    if dir_char not in ('p', 'n'):
-        raise argparse.ArgumentTypeError(f'Invalid direction: {direction}')
-
-    return dir_char
-
-
 def check_n_tags(n_tags: int) -> int:
     '''Check validity of direction argument'''
     i_n_tags = int(n_tags)
@@ -215,8 +206,8 @@ def parse_command_line() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        'direction', default='next', nargs='?', type=check_direction,
-        help=('Direction to cycle through tags. Either "next" or "previous".')
+        'direction', default='next', nargs='?', type=str, choices=('next', 'previous'),
+        help=('Direction to cycle through tags.')
     )
     parser.add_argument(
         'n_tags', default=32, nargs='?', type=check_n_tags,
@@ -298,7 +289,7 @@ def get_new_tags(cli_args: argparse.Namespace,
             return initial_tags
 
         new_tags = 0
-        if cli_args.direction == 'n':
+        if cli_args.direction == 'next':
             # If last tag is set => unset it and set first bit on new_tags
             if (tags & last_tag) != 0:
                 tags ^= last_tag
