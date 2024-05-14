@@ -193,10 +193,14 @@ def close_display(display: Display) -> None:
 
 def check_n_tags(n_tags: int) -> int:
     '''Check max tag number argument'''
-    i_n_tags = int(n_tags)
+    error_string = f'Invalid max number of tags: {n_tags}'
+    try:
+        i_n_tags = int(n_tags)
+    except Exception as exc:
+        raise argparse.ArgumentTypeError(error_string) from exc
+
     if i_n_tags < 1 or 32 < i_n_tags:
-        raise argparse.ArgumentTypeError(
-            f'Invalid max number of tags: {n_tags}')
+        raise argparse.ArgumentTypeError(error_string)
 
     return i_n_tags
 
