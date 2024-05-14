@@ -214,8 +214,8 @@ def parse_command_line() -> argparse.Namespace:
     parser.add_argument(
         'n_tags', default=32, nargs='?', type=check_n_tags,
         help=('The tag number the cycling should loop back to the first tag '
-              'or to the last tag from the first tag. Should be and integer '
-              'between 1 and 32 inclusive.')
+              'or to the last tag from the first tag. Integer between 1 and '
+              '32 inclusive.')
     )
     parser.add_argument(
         '--all-outputs', '-a', dest='all_outputs', action='store_true',
