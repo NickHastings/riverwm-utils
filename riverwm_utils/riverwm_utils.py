@@ -201,7 +201,7 @@ def check_direction(direction: str) -> str:
 
 
 def check_n_tags(n_tags: int) -> int:
-    '''Check validity of direction argument'''
+    '''Check max tag number argument'''
     i_n_tags = int(n_tags)
     if i_n_tags < 1 or 32 < i_n_tags:
         raise argparse.ArgumentTypeError(
