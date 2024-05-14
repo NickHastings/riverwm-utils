@@ -7,6 +7,7 @@ import struct
 try:
     from pywayland.protocol.wayland import WlOutput
     from pywayland.protocol.wayland import WlSeat
+    from pywayland.protocol.wayland import WlRegistry
     from pywayland.protocol.river_control_unstable_v1 import ZriverControlV1
     from pywayland.protocol.river_status_unstable_v1 import ZriverStatusManagerV1  # noqa: E501
 except ModuleNotFoundError:
@@ -72,25 +73,25 @@ class Output:
         self.tags = None
         self.status = None
 
-    def destroy(self):
+    def destroy(self) -> None:
         '''Cleanup'''
         if self.wl_output is not None:
             self.wl_output.destroy()
         if self.status is not None:
             self.status.destroy()
 
-    def configure(self):
+    def configure(self) -> None:
         '''Setup'''
         self.status = STATUS_MANAGER.get_river_output_status(self.wl_output)
         self.status.user_data = self
         self.status.dispatcher["focused_tags"] = self.handle_focused_tags
         self.status.dispatcher["view_tags"] = self.handle_view_tags
 
-    def handle_focused_tags(self, _, tags):
+    def handle_focused_tags(self, _, tags: int) -> None:
         '''Handle Event'''
         self.focused_tags = tags
 
-    def handle_view_tags(self, _, tags):
+    def handle_view_tags(self, _, tags: int) -> None:
         '''Handle Event'''
         self.view_tags = tags
 
@@ -102,7 +103,7 @@ class Seat:
         self.status = None
         self.focused_output = None
 
-    def destroy(self):
+    def destroy(self) -> None:
         '''Cleanup'''
         if self.wl_seat is not None:
             self.wl_seat.destroy()
@@ -110,20 +111,20 @@ class Seat:
         if self.status is not None:
             self.status.destroy()
 
-    def configure(self):
+    def configure(self) -> None:
         '''Setup'''
         self.status = STATUS_MANAGER.get_river_seat_status(self.wl_seat)
         self.status.user_data = self
         self.status.dispatcher["focused_output"] = self.handle_focused_output
 
-    def handle_focused_output(self, _, wl_output):
+    def handle_focused_output(self, _, wl_output: WlOutput) -> None:
         '''Handle Event'''
         for output in OUTPUTS:
             if output.wl_output == wl_output:
                 self.focused_output = output
 
 
-def registry_handle_global(registry, wid, interface, version):
+def registry_handle_global(registry: WlRegistry, wid: int, interface: str, version: int) -> None:
     '''Main Event Handler'''
     global STATUS_MANAGER
     global CONTROL
@@ -144,7 +145,7 @@ def registry_handle_global(registry, wid, interface, version):
             SEAT.wl_seat = registry.bind(wid, WlSeat, version)
 
 
-def prepare_display(display: Display):
+def prepare_display(display: Display) -> None:
     '''Prepare display global objects'''
     display.connect()
 
@@ -174,7 +175,7 @@ def prepare_display(display: Display):
     display.roundtrip()
 
 
-def close_display(display: Display):
+def close_display(display: Display) -> None:
     '''Clean up objects'''
     SEAT.destroy()
     for output in OUTPUTS:
@@ -262,7 +263,7 @@ def get_occupied_tags(cli_args: argparse.Namespace) -> int:
     return occupied_tags & used_tags
 
 
-def get_occupied_from_view_tags(view_tags: int):
+def get_occupied_from_view_tags(view_tags: int) -> int:
     '''Return bitmap of view_tags occupied tags as int'''
     occupied_tags = 0
     nviews = int(len(view_tags) / 4)
@@ -327,7 +328,7 @@ def get_new_tags(cli_args: argparse.Namespace,
         return tags
 
 
-def set_new_tags(cli_args: argparse.Namespace, new_tags: int):
+def set_new_tags(cli_args: argparse.Namespace, new_tags: int) -> None:
     '''Set the focussed tags'''
     if cli_args.follow:
         CONTROL.add_argument("set-view-tags")
@@ -362,7 +363,7 @@ def set_new_tags(cli_args: argparse.Namespace, new_tags: int):
     return
 
 
-def cycle_focused_tags():
+def cycle_focused_tags() -> None:
     '''Shift to next or previous tags'''
     args = parse_command_line()
     display = Display()
