@@ -124,7 +124,8 @@ class Seat:
                 self.focused_output = output
 
 
-def registry_handle_global(registry: WlRegistry, wid: int, interface: str, version: int) -> None:
+def registry_handle_global(registry: WlRegistry, wid: int, interface: str,
+                           version: int) -> None:
     '''Main Event Handler'''
     global STATUS_MANAGER
     global CONTROL
