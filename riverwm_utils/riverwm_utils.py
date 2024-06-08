@@ -283,14 +283,16 @@ def get_new_tags(cli_args: argparse.Namespace,
             ):
         return tags
 
+    test = 0
     i = 0
     initial_tags = tags
     last_tag = 1 << (cli_args.n_tags - 1)
     while True:
-        if i >= cli_args.n_tags:
+        if test >= cli_args.n_tags:
             # Looped over all tags. Something is wrong, bail out
             print('Warning looped over all tags')
             return initial_tags
+        test += 1
 
         new_tags = 0
         if cli_args.n_cycle > 0:
