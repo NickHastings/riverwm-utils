@@ -292,8 +292,8 @@ def get_new_tags(cli_args: argparse.Namespace,
             # Looped over all tags. Something is wrong, bail out
             print('Warning looped over all tags')
             return initial_tags
-        test += 1
 
+        test += 1
         new_tags = 0
         if cli_args.n_cycle > 0:
             # If last tag is set => unset it and set first bit on new_tags
