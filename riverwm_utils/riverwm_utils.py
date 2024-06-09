@@ -283,17 +283,10 @@ def get_new_tags(cli_args: argparse.Namespace,
             ):
         return tags
 
-    test = 0
     i = 0
     initial_tags = tags
     last_tag = 1 << (cli_args.n_tags - 1)
-    while True:
-        if test >= cli_args.n_tags:
-            # Looped over all tags. Something is wrong, bail out
-            print('Warning looped over all tags')
-            return initial_tags
-
-        test += 1
+    for _ in range(cli_args.n_tags):
         new_tags = 0
         if cli_args.n_cycle > 0:
             # If last tag is set => unset it and set first bit on new_tags
@@ -325,9 +318,22 @@ def get_new_tags(cli_args: argparse.Namespace,
         if i == abs(cli_args.n_cycle) % cli_args.n_tags:
             return tags
 
+    # Looped over all tags without returning, either skip options caused
+    # none of the potential tags to be viable or something went wrong.
+    if cli_args.skip_empty:
+        print('Cycle failed: all tags empty')
+    elif cli_args.skip_occupied:
+        print('Cycle failed: all tags occupied')
+    else:
+        # Something is wrong, bail out.
+        print('Cycle failed: looped over all tags')
+
+    return initial_tags
+
+
 
 def set_new_tags(cli_args: argparse.Namespace, new_tags: int) -> None:
-    '''Set the focussed tags'''
+    '''Set the focused tags'''
     if cli_args.follow:
         CONTROL.add_argument("set-view-tags")
         CONTROL.add_argument(str(new_tags))
